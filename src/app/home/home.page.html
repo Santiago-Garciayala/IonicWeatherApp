@@ -1,4 +1,13 @@
 <ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-searchbar slot="start"></ion-searchbar>
+    <ion-toggle slot="end" [(ngModel)]="imperial" (ionChange)="onUnitsToggled()">°C/°F</ion-toggle>
+    <!--
+    <ion-title>
+      {{title}}
+    </ion-title>
+    -->
+  </ion-toolbar>
   <ion-card>
     <ion-card-header>
       <ion-card-title>{{currentWeather.name}}</ion-card-title>
@@ -11,10 +20,10 @@
         <img [alt]="currentWeather?.weather[0].description" [src]="weatherServPublic.getIconUrl(currentWeather?.weather[0].icon, 4)">
         <ion-list>
           <ion-item>
-            <ion-label>Temperature: {{currentWeather?.main?.temp}}°C</ion-label>
+            <ion-label>Temperature: {{currentWeather?.main?.temp}}°{{unitChar}}</ion-label>
           </ion-item>
           <ion-item>
-            <ion-label>Feels like: {{currentWeather?.main?.feels_like}}°C</ion-label>
+            <ion-label>Feels like: {{currentWeather?.main?.feels_like}}°{{unitChar}}</ion-label>
           </ion-item>
           <ion-item>
             <ion-label>Humidity: {{currentWeather?.main?.humidity}}%</ion-label>
@@ -23,13 +32,6 @@
       </div>
     </ion-card-content>
   </ion-card>
-  <!--
-  <ion-toolbar>
-    <ion-title>
-      {{title}}
-    </ion-title>
-  </ion-toolbar>
-  -->
 </ion-header>
 
 <ion-content [fullscreen]="true">
@@ -45,14 +47,17 @@
       <ion-card-title>Weather Forecast</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <swiper-container [slidesPerView]='8' [loop]="false" mousewheel-force-to-axis="true">
+      <!-- Swiper makes it so you can scroll horizontally -->
+      <swiper-container [slidesPerView]='weatherSlideNum' [loop]="false" mousewheel-force-to-axis="true">
         @for(elem of weatherForecast?.list; track elem){
           <swiper-slide>
             <ion-card-subtitle>{{weatherServPublic.formatDT(elem.dt_txt)}}</ion-card-subtitle>
               <ion-avatar >
                 <img [alt]="elem.weather[0].description" [src]="weatherServPublic.getIconUrl(elem.weather[0].icon, 2)">
               </ion-avatar>
-            <ion-label >{{elem.weather[0].main}} {{elem.main.temp}}°C</ion-label>
+            <ion-label >{{elem.weather[0].main}}</ion-label>
+            <br>
+          <ion-label>{{elem.main.temp}}°{{unitChar}}</ion-label>
           </swiper-slide>
         }
       </swiper-container>
