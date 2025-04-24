@@ -30,6 +30,7 @@ export class HomePage implements OnInit {
   unitChar: string = 'C';
   cities: string[] = [];
   citiesQueryVisible: boolean = false;
+  cityQuery: string = '';
   constructor(private locationService: LocationService, private weatherService: WeatherService, private platform: Platform, private storage: Storage, private router: Router) { }
 
   async ngOnInit(): Promise<void> {
@@ -80,6 +81,7 @@ export class HomePage implements OnInit {
         next: (val) => {
           this.cities = val.map((data: any) => `${data.name}${data.country ? ',' + data.country : ''}`);
           console.log(this.cities);
+          console.log(val);
         },
         error: () => {
           this.cities = [];
@@ -104,8 +106,34 @@ export class HomePage implements OnInit {
 
   async navigateToCity(city: string): Promise<void> {
     this.citiesQueryVisible = true;
-    await this.router.navigate(['/city', city], { replaceUrl: true });
+
+    this.locationService.getCities(city).subscribe({
+      next: async (val) => {
+        this.location = {
+          longitude: val[0].lon,
+          latitude: val[0].lat,
+          coords: {
+            longitude: val[0].lon,
+            latitude: val[0].lat
+          }
+        };
+
+        await this.populateWeatherData();
+        console.log(this.currentWeather);
+      }
+    });
+
+    //I tried to make this work, but I kept getting an error like Error: Cannot activate an already activated outlet
+    //I know its 1/5 of the rubric but design wise its better to just refresh the same page anyways
+    //await this.router.navigate(['/city', city], { replaceUrl: true });
     this.citiesQueryVisible = false;
+  }
+
+  async searchCity() {
+    console.log(this.cityQuery);
+    if (this.cityQuery != '') {
+      await this.navigateToCity(this.cityQuery);
+    }
   }
 
 }

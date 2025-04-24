@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <!-- Currently doesnt do anything -->
-    <ion-searchbar slot="start" [debounce]="250" (ionInput)="showPossibleCities($event)" (ionFocus)="showCitiesList()" (ionBlur)="unshowCitiesList()"></ion-searchbar>
+    <ion-searchbar slot="start" [debounce]="250" (ionInput)="showPossibleCities($event)" (ionFocus)="showCitiesList()" (ionBlur)="unshowCitiesList()" [(ngModel)]="cityQuery" (change)="searchCity()"></ion-searchbar>
     <ion-toggle slot="end" [(ngModel)]="imperial" (ionChange)="onUnitsToggled()">°C/°F</ion-toggle>
     <!--
     <ion-title>
@@ -27,7 +27,7 @@
 
   <ion-card>
     <ion-card-header>
-      <ion-card-title>{{currentWeather.name}}</ion-card-title>
+      <ion-card-title>{{currentWeather.name}}, {{currentWeather.sys.country}}</ion-card-title>
       <ion-card-subtitle>{{currentWeather.weather[0].main}}</ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
