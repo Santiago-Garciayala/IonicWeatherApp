@@ -3,17 +3,20 @@ import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/stan
 import { LocationService } from '../services/location.service';
 import { WeatherService } from '../services/weather.service';
 import { JsonPipe } from '@angular/common'; //used to display entire js objects with angular data binding, i used it for debugging
-import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonList, IonItem, IonLabel, IonAvatar, IonSearchbar, IonToggle } from '@ionic/angular/standalone';
+import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonList, IonItem, IonLabel, IonAvatar, IonSearchbar, IonToggle, IonButton } from '@ionic/angular/standalone';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'; //for using Swiper, https://ionicframework.com/docs/angular/slides
 import { Platform } from '@ionic/angular/standalone';
 import { Storage } from '@ionic/storage-angular';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterLink, RouterLinkWithHref, Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, JsonPipe, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonList, IonItem, IonLabel, IonAvatar, IonSearchbar, IonToggle, FormsModule],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, JsonPipe, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonList, IonItem, IonLabel, IonAvatar, IonSearchbar, IonToggle, FormsModule, CommonModule, RouterLink, RouterLinkWithHref, IonButton],
   schemas: [CUSTOM_ELEMENTS_SCHEMA], //for using Swiper
 })
 export class HomePage implements OnInit {
@@ -25,7 +28,9 @@ export class HomePage implements OnInit {
   weatherSlideNum: number = 6;
   imperial: boolean = false;
   unitChar: string = 'C';
-  constructor(private locationService: LocationService, private weatherService: WeatherService, private platform: Platform, private storage: Storage) { }
+  cities: string[] = [];
+  citiesQueryVisible: boolean = false;
+  constructor(private locationService: LocationService, private weatherService: WeatherService, private platform: Platform, private storage: Storage, private router: Router) { }
 
   async ngOnInit(): Promise<void> {
     //calculate how many slides to display horizontally using window width, ref: https://stackoverflow.com/a/38740870
@@ -67,6 +72,40 @@ export class HomePage implements OnInit {
     await this.storage.set('imperial', this.imperial);
     this.unitChar = this.imperial ? 'F' : 'C';
     await this.populateWeatherData();
+  }
+
+  async showPossibleCities(event: CustomEvent) {
+    if (event.detail.value != '') {
+      this.locationService.getCities(event.detail.value).subscribe({
+        next: (val) => {
+          this.cities = val.map((data: any) => `${data.name}${data.country ? ',' + data.country : ''}`);
+          console.log(this.cities);
+        },
+        error: () => {
+          this.cities = [];
+        }
+      });
+    } else {
+      this.cities = [];
+    }
+
+  }
+
+  showCitiesList(): void {
+    this.citiesQueryVisible = true;
+  }
+
+  async unshowCitiesList(): Promise<void> {
+    //this line is basically just sleep(), from https://stackoverflow.com/a/39914235
+    //had to do this because if i didnt then it would close the search results before it registered the click
+    await new Promise(r => setTimeout(r, 500));
+    this.citiesQueryVisible = false;
+  }
+
+  async navigateToCity(city: string): Promise<void> {
+    this.citiesQueryVisible = true;
+    await this.router.navigate(['/city', city], { replaceUrl: true });
+    this.citiesQueryVisible = false;
   }
 
 }

@@ -20,7 +20,6 @@ export class WeatherService {
   getForecast3h5d(pos: Position, imperial: boolean): Observable<any> {
     let units: string = imperial ? 'imperial' : 'metric';
     let url = `https://api.openweathermap.org/data/2.5/forecast?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&appid=${environment.OPEN_WEATHER_API_KEY}&units=${units}`;
-    console.log(url);
     return this.http.get(url);
   }
 
